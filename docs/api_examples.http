@@ -1,0 +1,76 @@
+@baseUrl = http://localhost:8080
+@userId = 11111111-1111-1111-1111-111111111111
+@documentId = replace_document_id
+@quizId = replace_quiz_id
+
+### Upload document
+POST {{baseUrl}}/api/documents/upload
+X-User-Id: {{userId}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="file"; filename="sample.pdf"
+Content-Type: application/pdf
+
+< ./sample.pdf
+--boundary--
+
+### Poll document processing
+GET {{baseUrl}}/api/documents/{{documentId}}/status
+X-User-Id: {{userId}}
+
+### Get chunks/topics
+GET {{baseUrl}}/api/documents/{{documentId}}/chunks
+X-User-Id: {{userId}}
+
+### Generate quiz
+POST {{baseUrl}}/api/quizzes/generate
+X-User-Id: {{userId}}
+Content-Type: application/json
+
+{
+  "documentId": "{{documentId}}",
+  "quizPlan": [
+    {
+      "quantity": 2,
+      "difficulty": "EASY",
+      "questionType": "MULTIPLE_CHOICE",
+      "choiceMode": "MULTIPLE_CORRECT",
+      "numChoices": 5,
+      "numCorrect": 2,
+      "chunkIds": []
+    },
+    {
+      "quantity": 3,
+      "difficulty": "HARD",
+      "questionType": "MULTIPLE_CHOICE",
+      "choiceMode": "SINGLE_CORRECT",
+      "numChoices": 4,
+      "numCorrect": 1,
+      "chunkIds": []
+    }
+  ],
+  "personalization": {
+    "enabled": true,
+    "focusWrongConcepts": true,
+    "avoidRecentQuestions": true
+  }
+}
+
+### Submit quiz
+POST {{baseUrl}}/api/quizzes/{{quizId}}/submit
+X-User-Id: {{userId}}
+Content-Type: application/json
+
+{
+  "answers": [
+    {
+      "questionId": "replace_question_id",
+      "selectedOptionIds": ["replace_option_id"]
+    }
+  ]
+}
+
+### Study history
+GET {{baseUrl}}/api/users/me/history
+X-User-Id: {{userId}}
